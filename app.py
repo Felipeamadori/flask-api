@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from models import *
 
+
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///banco.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -12,6 +13,21 @@ db = SQLAlchemy(app)
 def get_campos():
     campos = Campo.query.all()
     return jsonify([campo.to_json() for campo in campos])
+
+@app.route('/lotes', methods=['GET'])
+def get_lotes():
+    lotes = Lote.query.all()
+    return jsonify([lote.to_json() for lote in lotes])
+
+@app.route('/animais', methods=['GET'])
+def get_animais():
+    animais = Animal.query.all()
+    return jsonify([animal.to_json() for animal in animais])
+
+@app.route('/campos', methods=['GET'])
+def get_historicos():
+    historicos = Historico.query.all()
+    return jsonify([historico.to_json() for historico in historicos])
 
 @app.route("/campo/<int:id>", methods=["GET"])
 def get_campo(id):
@@ -54,6 +70,9 @@ def update_campo(id):
     campo.condicao = request.json.get('condicao', campo.condicao)
     db.session.commit()
     return jsonify(campo.to_json())
+
+
+
 
 if __name__=="__main__":
     app.run(debug=True)
