@@ -24,17 +24,31 @@ def get_animais():
     animais = Animal.query.all()
     return jsonify([animal.to_json() for animal in animais])
 
-@app.route('/campos', methods=['GET'])
+@app.route('/historicos', methods=['GET'])
 def get_historicos():
     historicos = Historico.query.all()
     return jsonify([historico.to_json() for historico in historicos])
 
-@app.route("/campo/<int:id>", methods=["GET"])
+@app.route("/campos/<int:id>", methods=["GET"])
 def get_campo(id):
     campo = Campo.query.get(id)
     if campo is None:
         abort(404)
     return jsonify(campo.to_json())
+
+@app.route("/lotes/<int:id>", methods=["GET"])
+def get_lote(id):
+    lote = Lote.query.get(id)
+    if lote is None:
+        abort(404)
+    return jsonify(lote.to_json())
+
+@app.route("/animais/<int:id>", methods=["GET"])
+def get_campo(id):
+    animal = Animal.query.get(id)
+    if animal is None:
+        abort(404)
+    return jsonify(animal.to_json())
     
 @app.route("/campo/<int:id>", methods=["DELETE"])
 def delete_campo(id):
@@ -45,7 +59,7 @@ def delete_campo(id):
     db.session.commit()
     return jsonify({'result': True})
 
-@app.route('/campo', methods=['POST'])
+@app.route('/campos', methods=['POST'])
 def create_campo():
     if not request.json:
         abort(400)
@@ -58,7 +72,7 @@ def create_campo():
     db.session.commit()
     return jsonify(campo.to_json()), 201
 
-@app.route('/campo/<int:id>', methods=['PUT'])
+@app.route('/campos/<int:id>', methods=['PUT'])
 def update_campo(id):
     if not request.json:
         abort(400)
