@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from models import *
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -44,13 +45,21 @@ def get_lote(id):
     return jsonify(lote.to_json())
 
 @app.route("/animais/<int:id>", methods=["GET"])
-def get_campo(id):
+def get_animal(id):
     animal = Animal.query.get(id)
     if animal is None:
         abort(404)
     return jsonify(animal.to_json())
+
+@app.route("/historicos/<entrada>", methods=["GET"])
+def get_historico(entrada):
+    entrada = datetime.strptime(entrada, '%Y-%m-%d')
+    historico = Historico.query.get(entrada)
+    if historico is None:
+        abort(404)
+    return jsonify(historico.to_json())
     
-@app.route("/campo/<int:id>", methods=["DELETE"])
+@app.route("/campos/<int:id>", methods=["DELETE"])
 def delete_campo(id):
     campo = Campo.query.get(id)
     if campo is None:
@@ -59,11 +68,29 @@ def delete_campo(id):
     db.session.commit()
     return jsonify({'result': True})
 
+@app.route("/lotes/<int:id>", methods=["DELETE"])
+def delete_lote(id):
+    lote = Lote.query.get(id)
+    if lote is None:
+        abort(404)
+    db.session.delete(lote)
+    db.session.commit()
+    return jsonify({'result': True})
+
+@app.route("/animais/<int:id>", methods=["DELETE"])
+def delete_animal(id):
+    animal = Animal.query.get(id)
+    if animal is None:
+        abort(404)
+    db.session.delete(animal)
+    db.session.commit()
+    return jsonify({'result': True})
+
 @app.route('/campos', methods=['POST'])
 def create_campo():
     if not request.json:
         abort(400)
-    campo = campo(
+    campo = Campo(
         nome=request.json.get('nome'),
         tipo=request.json.get('tipo'),
         condicao=request.json.get('condicao')
