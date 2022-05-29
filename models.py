@@ -19,7 +19,7 @@ class Campo(db.Model):
 class Lote(db.Model):
     __tablename__ = 'lote'
     id = db.Column(db.Integer, primary_key=True) 
-    qtd = db.Column(db.String(80), nullable=False)
+    qtd = db.Column(db.Integer,  default=0, nullable=False)
     descricao = db.Column(db.Integer, nullable=False)
     animais = db.relationship('Animal', backref='lote', lazy=True)
     historicos = db.relationship('Historico', backref='lote', lazy=True)
@@ -44,14 +44,16 @@ class Animal(db.Model):
                 "lote_id" : self.lote_id}
 
 class Historico(db.Model):
-    __tablename__='historico'
-    entrada = db.Column(db.Date, primary_key=True)
-    saida = db.Column(db.Date)
+    __tablename__= 'historico'
+    id = db.Column(db.Integer, primary_key=True) 
+    entrada = db.Column(db.String(10), nullable=False)
+    saida = db.Column(db.String(10), default='NULL')
     lote_id = db.Column(db.Integer, db.ForeignKey('lote.id'), nullable=False)
     campo_id = db.Column(db.Integer, db.ForeignKey('campo.id'), nullable=False)
 
     def to_json(self):
-        return {"entrada" : self.entrada,
+        return {"id" : self.id,
+                "entrada" : self.entrada,
                 "saida" : self.saida,
                 "campo_id" : self.campo_id,
                 "lote_id" : self.lote_id}
