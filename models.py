@@ -45,8 +45,9 @@ class Animal(db.Model):
 
 class Historico(db.Model):
     __tablename__='historico'
-    entrada = db.Column(db.Date, primary_key=True)
-    saida = db.Column(db.Date)
+    id = db.Column(db.Integer, primary_key=True) 
+    entrada = db.Column(db.String(80))
+    saida = db.Column(db.String(80))
     lote_id = db.Column(db.Integer, db.ForeignKey('lote.id'), nullable=False)
     campo_id = db.Column(db.Integer, db.ForeignKey('campo.id'), nullable=False)
 
