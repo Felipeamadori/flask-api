@@ -1,9 +1,18 @@
 from os import abort
 from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from modelEncoder import ModelEncoder
 from models import *
 from datetime import datetime
-from settings import app, db
+from flask_cors import CORS
 
+app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///banco.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.json_encoder = ModelEncoder
+
+db = SQLAlchemy(app)
+CORS(app)
 
 @app.route('/campos', methods=['GET'])
 def get_campos():
@@ -46,12 +55,12 @@ def get_animal(id):
         abort(404)
     return jsonify(animal.to_json())
 
-@app.route("/historicos/<int:id>", methods=["GET"])
-def get_historico(id):
-    historico = Historico.query.get(id)
+@app.route("/historicos/<entrada>", methods=["GET"])
+def get_historico(entrada):
+    entrada = datetime.strptime(entrada, '%Y-%m-%d')
+    historico = Historico.query.get(entrada)
     if historico is None:
         abort(404)
-   # historico.entrada = datetime.strptime(historico.entrada, '%Y-%m-%d')    
     return jsonify(historico.to_json())
     
 @app.route("/campos/<int:id>", methods=["DELETE"])
@@ -59,6 +68,7 @@ def delete_campo(id):
     campo = Campo.query.get(id)
     if campo is None:
         abort(404)
+    campo = db.session.query(Campo).filter(Campo.id == id).first()
     db.session.delete(campo)
     db.session.commit()
     return jsonify({'result': True})
@@ -77,68 +87,10 @@ def delete_animal(id):
     animal = Animal.query.get(id)
     if animal is None:
         abort(404)
+    animal = db.session.query(Animal).filter(Animal.id == id).first()
     db.session.delete(animal)
     db.session.commit()
     return jsonify({'result': True})
-
-@app.route("/historicos/<int:id>", methods=["DELETE"])
-def delete_historico(id):
-    historico = Historico.query.get(id)
-    if historico is None:
-        abort(404)
-    db.session.delete(historico)
-    db.session.commit()
-    return jsonify({'result': True})
-
-#Post e Put de Historico 
-
-@app.route('/historicos', methods=['POST'])
-def create_historico():
-    if not request.json:
-        abort(400)
-    if request.json.get('saida'):
-        historico = Historico(
-        #   entrada=datetime.strptime(request.json.get('entrada'), '%Y-%m-%d'),
-        #   saida=datetime.strptime(request.json.get('saida'), '%Y-%m-%d'),
-            entrada=request.json.get('entrada'),
-            saida=request.json.get('saida'),
-            campo_id=request.json.get('campo_id'),
-            lote_id=request.json.get('lote_id')
-        )
-    else:
-        historico = Historico(
-            entrada=request.json.get('entrada'),
-            campo_id=request.json.get('campo_id'),
-            lote_id=request.json.get('lote_id')
-        )
-
-    db.session.add(historico)
-    db.session.commit()
-    return jsonify(historico.to_json()), 201
-
-@app.route('/historicos/<int:id>', methods=['PUT'])
-def update_historico(id):
-    if not request.json:
-        abort(400)
-    historico = Historico.query.get(id)
-    if historico is None:
-        abort(404)
-    
-    if request.json.get('saida'):
-            historico.entrada=request.json.get('entrada',historico.entrada),
-            historico.saida=request.json.get('saida',historico.saida),
-            historico.campo_id=request.json.get('campo_id',historico.campo_id),
-            historico.lote_id=request.json.get('lote_id',historico.lote_id)
-    else:
-            historico.entrada=request.json.get('entrada',historico.entrada),
-            historico.campo_id=request.json.get('campo_id',historico.campo_id),
-            historico.lote_id=request.json.get('lote_id',historico.lote_id)
-
-    db.session.merge(historico)
-    db.session.commit()
-    return jsonify(historico.to_json())
-
-###############################################################################################
 
 @app.route('/campos', methods=['POST'])
 def create_campo():
